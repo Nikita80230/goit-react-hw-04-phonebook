@@ -1,73 +1,46 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { Phonebook } from './Phonebook/Phonebook';
 import { ContactsList } from './ContactsList/ContactsList';
+import { getContactsFromLocalStorage } from 'utils/getContactsFromLocalStorage';
 
-export class App extends Component {
-  state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    searchTerm: '',
-  };
+export const App = () => {
+  const [contacts, setContacts] = useState(() => getContactsFromLocalStorage());
+  const [searchTerm, setSearchTerm] = useState('');
 
-  addNewContact = data => {
-
-    if (this.state.contacts.some(contact => contact.name === data.name)) {
+  const addNewContact = data => {
+    if (contacts.some(contact => contact.name === data.name)) {
       alert(`${data.name} is already in contacts`);
     } else {
-      this.setState(prevState => ({
-        contacts: [...prevState.contacts, data],
-      }));
+      setContacts(contacts => [...contacts, data]);
     }
   };
 
-  searchNameInPhonebook = nameToFind => {
-    this.setState({
-      searchTerm: nameToFind,
-    });
+  const searchNameInPhonebook = nameToFind => {
+    setSearchTerm(nameToFind);
   };
 
-  removeContact = id => {
-    this.setState({
-      contacts: this.state.contacts.filter(contact => contact.id !== id),
-    });
+  const removeContact = id => {
+    setContacts(contacts.filter(contact => contact.id !== id));
   };
 
-  componentDidMount() {
-    const stringifyContacts = localStorage.getItem("contacts");
-    const parsedContacts = JSON.parse(stringifyContacts) ?? [];
-    console.log("console in didMount")
+  useEffect(
+    () => localStorage.setItem('contacts', JSON.stringify(contacts)),
+    [contacts]
+  );
 
-    this.setState({
-      contacts: parsedContacts,
-    })
-  }
+  const filteredContacts = contacts.filter(({ name }) =>
+    name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.contacts.length !== this.state.contacts.length) {
-      const stringifyState = JSON.stringify(this.state.contacts);
-      localStorage.setItem("contacts", stringifyState)
-    }
-  }
-
-  render() {
-    const filteredContacts = this.state.contacts.filter(({ name }) =>
-      name.toLowerCase().includes(this.state.searchTerm.toLowerCase())
-    );
-
-    return (
-      <div>
-        <Phonebook addNewContact={this.addNewContact} />
-        <ContactsList
-          searchNameInPhonebook={this.searchNameInPhonebook}
-          contactsArray={this.state.contacts}
-          filteredContacts={filteredContacts}
-          removeContact={this.removeContact}
-        />
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <Phonebook addNewContact={addNewContact} />
+      <ContactsList
+        searchNameInPhonebook={searchNameInPhonebook}
+        contactsArray={contacts}
+        filteredContacts={filteredContacts}
+        removeContact={removeContact}
+      />
+    </div>
+  );
+};

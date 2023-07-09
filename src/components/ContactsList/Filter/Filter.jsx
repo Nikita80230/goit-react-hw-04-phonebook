@@ -1,32 +1,26 @@
 import css from './Filter.module.css';
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 
-export class Filter extends Component {
-    state = {
-        contactsFromPhonebook: '',
+export const Filter = ({ searchNameInPhonebook }) => {
+    const [contactsFromPhonebook, setContactsFromPhonebook] = useState('');
+
+    const handleChange = event => {
+        setContactsFromPhonebook(event.currentTarget.value);
+
+        searchNameInPhonebook(event.currentTarget.value);
     };
 
-    handleChange = event => {
-        this.setState({
-            contactsFromPhonebook: event.currentTarget.value,
-        });
-
-        this.props.searchNameInPhonebook(event.currentTarget.value);
-    };
-
-    render() {
-        return (
-            <>
-                <div className={css.contactWrapper}>
-                    <span>Find contacts by name</span>
-                    <input
-                        name="inputName"
-                        onChange={this.handleChange}
-                        type="text"
-                        value={this.state.contactsFromPhonebook}
-                    />
-                </div>
-            </>
-        );
-    }
-}
+    return (
+        <>
+            <div className={css.contactWrapper}>
+                <span>Find contacts by name</span>
+                <input
+                    name="inputName"
+                    onChange={handleChange}
+                    type="text"
+                    value={contactsFromPhonebook}
+                />
+            </div>
+        </>
+    );
+};
